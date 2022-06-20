@@ -46,20 +46,22 @@ class NatureQN(Linear):
 
         ##############################################################
         ################ YOUR CODE HERE - 25-30 lines lines ################
-        import pdb; pdb.set_trace()
         model = nn.Sequential(
-            nn.Conv2d(n_channels, 32, 8, stride=4, padding=2),
+            nn.Conv2d(n_channels, 32, 8, stride=4, padding=4),
             nn.ReLU(),
-            nn.Conv2d(32, 64, 4, stride=2, padding=1),
+            nn.Conv2d(32, 64, 4, stride=2, padding=2),
             nn.ReLU(),
             nn.Conv2d(64, 64, 3, stride=1, padding=1),
             nn.ReLU(),
             nn.Flatten(),
+            nn.Linear(64*int(img_height/8+1.5)*int(img_height/8+1.5), 512),
+            nn.ReLU(),
             nn.Linear(512, num_actions)
         )
 
+        import copy
         self.q_network = model
-        self.target_network = model.clone()
+        self.target_network = copy.deepcopy(model)
         
         ##############################################################
         ######################## END YOUR CODE #######################
@@ -85,7 +87,14 @@ class NatureQN(Linear):
 
         ##############################################################
         ################ YOUR CODE HERE - 4-5 lines lines ################
-        
+        if network == 'q_network': net = self.q_network
+        else: net = self.target_network
+
+        outs = []
+
+        for i in range(state.shape[0]):
+            outs.append(net(state[i]))
+        out = torch.stack(outs)
         ##############################################################
         ######################## END YOUR CODE #######################
         return out

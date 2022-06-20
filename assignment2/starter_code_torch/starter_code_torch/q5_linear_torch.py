@@ -37,8 +37,8 @@ class Linear(DQN):
 
         ##############################################################
         ################ YOUR CODE HERE (2 lines) ##################
-        self.q_network = nn.Linear((img_height * img_width * n_channels), num_actions)
-        self.target_network = nn.Linear((img_height * img_width * n_channels), num_actions)
+        self.q_network = nn.Linear((img_height * img_width * n_channels * config.state_history), num_actions)
+        self.target_network = nn.Linear((img_height * img_width * n_channels * config.state_history), num_actions)
         ##############################################################
         ######################## END YOUR CODE #######################
 
@@ -64,18 +64,16 @@ class Linear(DQN):
 
         ##############################################################
         ################ YOUR CODE HERE - 3-5 lines ##################
-        if network == 'q_network': net = self.q_network
+        if network == 'q_network': net = self.q_network 
         else: net = self.target_network
-        n_channels = int(state.shape[3]/config.state_history)
+        # print('state shape: ', state.shape)
         outs = []
         for i in range(state.shape[0]):
-            dim = net(state[i,:,:,0:n_channels].flatten())
-            for j in range(config.state_history-1):
-                dim += net(state[i,:,:,j+1:j+1+n_channels].flatten())
-            dim = dim/(config.state_history)
-            outs.append(dim)
-        out = torch.cat(outs)
-        # print('out shape: ', out.shape)
+            outs.append(net(state[i].flatten()))
+        out = torch.stack(outs)
+        # out = torch.cat(outs)
+        print('len of outs: ', len(outs))
+        print('out shape: ', out.shape)
         ##############################################################
         ######################## END YOUR CODE #######################
 
@@ -140,13 +138,10 @@ class Linear(DQN):
         ##############################################################
         ##################### YOUR CODE HERE - 3-5 lines #############
         
-        print('loss function')
-        Q_hat = q_values.view(-1, num_actions)[torch.arange(len(actions)), actions.tolist()]
+        Q_hat = torch.sum(q_values.view(-1,num_actions)*torch.nn.functional.one_hot(actions.long(), num_actions), axis=1)
         Q_target, _  = torch.max(target_q_values.view(-1, num_actions), 1)
-        Q_samp = rewards + gamma*Q_target
-        Q_samp[done_mask] = rewards[done_mask]
+        Q_samp = rewards + (1.0 - done_mask.type(torch.float))*gamma*Q_target ## Convert boolean to float
         loss = torch.nn.functional.mse_loss(Q_samp, Q_hat)
-        print(loss)
         return loss
         
         ##############################################################
