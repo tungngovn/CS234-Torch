@@ -19,8 +19,7 @@ class config():
     saving_freq       = 5000
     log_freq          = 50
     eval_freq         = 1000
-    # soft_epsilon      = 0
-    soft_epsilon      = 1
+    soft_epsilon      = 0
 
     # hyper params
     nsteps_train       = 10000
@@ -37,4 +36,3 @@ class config():
     eps_end            = 0.01
     eps_nsteps         = nsteps_train/2
     learning_start     = 200
-    # learning_start     = 150 ## Tung debug

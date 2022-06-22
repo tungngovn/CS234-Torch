@@ -41,8 +41,8 @@ class EnvTest(object):
         
 
     def step(self, action):
-        # import pdb; pdb.set_trace()
-        # print('action: ', action)
+        # import pdb; pdb.set_trace() ## debug
+        # print('action: ', action) ## debug
         assert(0 <= action <= 4)
         self.num_iters += 1
         if action < 4:   

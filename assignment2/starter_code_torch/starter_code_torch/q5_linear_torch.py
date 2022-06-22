@@ -10,9 +10,6 @@ from q4_schedule import LinearExploration, LinearSchedule
 
 from configs.q5_linear import config
 
-## Tung added
-import pdb
-
 class Linear(DQN):
     """
     Implement Fully Connected with Tensorflow
@@ -64,16 +61,9 @@ class Linear(DQN):
 
         ##############################################################
         ################ YOUR CODE HERE - 3-5 lines ##################
-        if network == 'q_network': net = self.q_network 
-        else: net = self.target_network
-        # print('state shape: ', state.shape)
-        outs = []
-        for i in range(state.shape[0]):
-            outs.append(net(state[i].flatten()))
-        out = torch.stack(outs)
-        # out = torch.cat(outs)
-        print('len of outs: ', len(outs))
-        print('out shape: ', out.shape)
+        state = torch.flatten(state, start_dim=1)
+        if network == 'q_network': out = self.q_network(state) 
+        else: out = self.target_network(state)
         ##############################################################
         ######################## END YOUR CODE #######################
 
@@ -138,11 +128,13 @@ class Linear(DQN):
         ##############################################################
         ##################### YOUR CODE HERE - 3-5 lines #############
         
-        Q_hat = torch.sum(q_values.view(-1,num_actions)*torch.nn.functional.one_hot(actions.long(), num_actions), axis=1)
+        Q_hat = torch.sum(q_values.view(-1,\
+            num_actions)*torch.nn.functional.one_hot(actions.long(), \
+            num_actions), axis=1)
         Q_target, _  = torch.max(target_q_values.view(-1, num_actions), 1)
         Q_samp = rewards + (1.0 - done_mask.type(torch.float))*gamma*Q_target ## Convert boolean to float
-        loss = torch.nn.functional.mse_loss(Q_samp, Q_hat)
-        return loss
+        self.loss = torch.nn.functional.mse_loss(Q_samp, Q_hat)
+        return self.loss
         
         ##############################################################
         ######################## END YOUR CODE #######################

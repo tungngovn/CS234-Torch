@@ -191,7 +191,8 @@ class QN(object):
         max_q_values = deque(maxlen=1000)
         q_values = deque(maxlen=1000)
         self.init_averages()
-
+        
+        # import pdb; pdb.set_trace() ## debug
         t = last_eval = last_record = 0 # time control of nb of steps
         scores_eval = [] # list of scores computed at iteration time
         scores_eval += [self.evaluate()]
@@ -368,9 +369,10 @@ class QN(object):
                 total_reward += reward
                 if done:
                     break
-
+                print('total reward: ', total_reward) ## debug
             # updates to perform at the end of an episode
             rewards.append(total_reward)     
+            print('rewards: ', rewards) ## debug
 
         avg_reward = np.mean(rewards)
         sigma_reward = np.sqrt(np.var(rewards) / len(rewards))
@@ -404,7 +406,7 @@ class QN(object):
         """
         # initialize
         self.initialize()
-
+        # import pdb; pdb.set_trace() ## debugging
         # record one game at the beginning
         if self.config.record:
             self.record()
